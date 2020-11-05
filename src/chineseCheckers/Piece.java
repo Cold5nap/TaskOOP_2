@@ -2,9 +2,10 @@ package chineseCheckers;
 
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
 
-import static chineseCheckers.CheckersApp.TILE_SIZE;
+import static chineseCheckers.ChineseCheckersApp.TILE_SIZE;
 
 //класс самой шашки
 public class Piece extends StackPane {
@@ -19,7 +20,6 @@ public class Piece extends StackPane {
         this.type = type;
 
         move(x, y);
-
         Ellipse bg = new Ellipse(TILE_SIZE * 0.3125, TILE_SIZE * 0.26);
         bg.setFill(Color.BLACK);
 

@@ -1,9 +1,10 @@
 package chineseCheckers;
 
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Circle;
+
 //клетка на игровой доске
-public class Tile extends Rectangle {
+public class Tile extends Circle {
 
     private Piece piece;
 
@@ -19,13 +20,30 @@ public class Tile extends Rectangle {
         this.piece = piece;
     }
 
-    // light - определяет один из двух возможных цветов
-    public Tile(boolean light, int x, int y) {
-        setWidth(CheckersApp.TILE_SIZE);
-        setHeight(CheckersApp.TILE_SIZE);
+    private double x;
+    private double y;
 
-        relocate(x * CheckersApp.TILE_SIZE, y * CheckersApp.TILE_SIZE);
+    public Tile( double x, double y) {
+        this.x = x;
+        this.y = y;
+        setRadius(ChineseCheckersApp.TILE_SIZE/2);
+        relocate(x * ChineseCheckersApp.TILE_SIZE, y * ChineseCheckersApp.TILE_SIZE);
+        setFill(Color.DARKGREY);
+    }
 
-        setFill(light ? Color.valueOf("#feb") : Color.valueOf("#582"));
+    public boolean equals(Tile tile) {
+        if (Math.abs(x - tile.getX())<0.0001 && Math.abs(y - tile.getY())<0.0001) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
     }
 }
