@@ -2,7 +2,6 @@ package chineseCheckers;
 
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Ellipse;
 
 import static chineseCheckers.ChineseCheckersApp.TILE_SIZE;
@@ -16,7 +15,7 @@ public class Piece extends StackPane {
     private double oldX, oldY;
 
     //сама шашка (графика) и действия с ней
-    public Piece(PieceType type, int x, int y) {
+    public Piece(PieceType type, double x, double y) {
         this.type = type;
 
         move(x, y);
@@ -62,8 +61,9 @@ public class Piece extends StackPane {
     public double getOldY() {
         return oldY;
     }
-//расположение по х и у
-    public void move(int x, int y) {
+
+    //расположение по х и у
+    public void move(double x, double y) {
         oldX = x * TILE_SIZE;
         oldY = y * TILE_SIZE;
         relocate(oldX, oldY);

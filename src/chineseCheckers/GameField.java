@@ -16,20 +16,37 @@ public class GameField {
         return adjTilesMap.keySet().iterator();
     }
 
+    public Tile getTile(double x, double y) {
+        Set<Tile> tileSet = adjTilesMap.keySet();
+        Tile tile = null;
+        for (Tile t : tileSet) {
+            if (t.equals(new Tile(x, y))){
+                tile = t;
+                break;
+            }
+        }
+        return tile;
+    }
+
+    public List<Tile> getValue(Tile key) {
+        return adjTilesMap.get(key);
+    }
+
     public List<Tile> getTiles() {
-        List<Tile> list =new ArrayList<>();
+        List<Tile> list = new ArrayList<>();
         Iterator iterator = adjTilesMap.keySet().iterator();
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             Tile tile = (Tile) iterator.next();
             list.add(tile);
         }
         return list;
     }
+
     public boolean containTile(Tile tile) {
         Iterator iterator = adjTilesMap.keySet().iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             Tile t = (Tile) iterator.next();
-            if (tile.getX()==t.getX()&&tile.getY()==t.getY()) {
+            if (tile.getX() == t.getX() && tile.getY() == t.getY()) {
                 return true;
             }
         }
