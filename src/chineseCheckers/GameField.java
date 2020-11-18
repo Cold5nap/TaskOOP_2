@@ -21,8 +21,7 @@ public class GameField {
         Tile tile = null;
         for (Tile t : tileSet) {
             if (t.equals(new Tile(x, y))){
-                tile = t;
-                break;
+                return t;
             }
         }
         return tile;
@@ -112,7 +111,13 @@ public class GameField {
         return isAdded;
     }
 
-    //Remove adjacent between vertices
+    /**
+     * Удаление ребра между вершинами.
+     * @param v1 Первая вершина
+     * @param v2 Вторая вершина
+     * @return true если ребро имелось и было удалено,
+     * false если его не было
+     */
     public boolean removeAdj(Tile v1, Tile v2) {
         if (adjTilesMap.get(v1) != null && adjTilesMap.get(v2) != null) {
             adjTilesMap.get(v1).remove(v2);
@@ -136,24 +141,10 @@ public class GameField {
      * TYPE List<Tile>
      *
      * @param v -Tile
-     * @return adjVertices
+     * @return List<Tile> adjVertices
      */
     public List<Tile> getAdjVertices(Tile v) {
         return adjTilesMap.get(v);
     }
-        
-/*
-        public void printGraph() {
-            for (Map.Entry entry : adjVerticesMap.entrySet()) {
-                Tile v = (Tile) entry.getKey();
-                System.out.println(v.label);
-                List<Tile> l = (List<Tile>) entry.getValue();
-                for (Tile Tile : l) {
-                    System.out.println(" Value: " + Tile.label);
-                }
-            }
-        }
-        
- */
 }
 

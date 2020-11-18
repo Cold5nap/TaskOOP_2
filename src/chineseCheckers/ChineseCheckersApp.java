@@ -37,7 +37,7 @@ public class ChineseCheckersApp extends Application {
         createTiles();
         createAdj();
         createPieces();
-        System.out.println("TILE"+gBoard.getTile(10.5,13));
+        System.out.println("TILE" + gBoard.getTile(10.5, 13));
         return root;
     }
 
@@ -162,13 +162,17 @@ public class ChineseCheckersApp extends Application {
     }
 
     /**
-     * размещение на доске
+     * Возращает вещественный номер клетки,
+     * в зависимости от того на каком уровне находится клетка.
+     * Если клетка находится на уровне, где идет смещение Tile на 0.5 по оси ОХ,
+     * то возвращает округление до ближайшей половины(5.7->5.5,6.1->6.5),
+     * иначе берется стандартное округление числа.
      *
      * @param pixel - нынешнее расположение
      * @return
      */
     private double toBoard(double pixel, boolean isHalf) {
-        pixel = (pixel + (double) TILE_SIZE / 2) / TILE_SIZE;
+        pixel = pixel / TILE_SIZE;
         if (isHalf) {
             return roundHalfDouble(pixel);
         } else {
@@ -177,11 +181,13 @@ public class ChineseCheckersApp extends Application {
     }
 
     private MoveResult tryMove(Piece piece, double newX, double newY) {
-        //переход на плитку, где есть шашка(исключаем возможность перейти на плитку с шашкой)
 
-        if (gBoard.getTile(newX, newY).hasPiece()) {
+        Tile newTile = gBoard.getTile(newX, newY);
+        //переход на плитку, где есть шашка(исключаем возможность перейти на плитку с шашкой)
+        if (newTile.hasPiece()) {
             return new MoveResult(MoveType.NONE);
         }
+
         double x0;
         double y0 = toBoard(piece.getOldY(), false);
         if (y0 % 2 == 0) {
@@ -190,26 +196,23 @@ public class ChineseCheckersApp extends Application {
             x0 = toBoard(piece.getOldX(), true);
         }
 
-
-        Tile newTile = gBoard.getTile(newX, newY);
-        List<Tile> adjTileList = gBoard.getAdjVertices(gBoard.getTile(x0, y0));
-
-        //передвижение на ближайшую плитку, где нет шашки
-        if (adjTileList.contains(newTile)) {
+        List<Tile> adjTileList0 = gBoard.getAdjVertices(gBoard.getTile(x0, y0));
+        if (adjTileList0.contains(newTile)) {
+            //передвижение на самую близкую плитку, где нет шашки
             return new MoveResult(MoveType.NORMAL);
-        } else {
+        } else {//прыжок через шашку на плитку, где нет шашки
+            List<Tile> adjTileListNew = gBoard.getAdjVertices(gBoard.getTile(newX, newY));
+            int countCommonCells = 0;
 
-            //прыжок через шашку на плитку, где нет шашки
-            for (Tile adjTile : adjTileList) {
-                if (gBoard.getAdjVertices(adjTile).contains(newTile)) {
-                    double x1 = x0 + (newX - x0) / 2;
-                    double y1 = y0 + (newY - y0) / 2;
-                    System.out.println(" x1= "+x1+" y1= "+ y1);
-                    if (gBoard.getTile(x1, y1).hasPiece()) {
-                        return new MoveResult(MoveType.JIMPOVER, gBoard.getTile(x1, y1).getPiece());
-                    }
-                    break;
+            for (Tile adjTile0 : adjTileList0) {
+                for (Tile adjTileNew : adjTileListNew) {
+                    if (adjTile0.equals(adjTileNew) && adjTile0.hasPiece())
+                        countCommonCells++;
                 }
+            }
+
+            if (countCommonCells == 1) {
+                return new MoveResult(MoveType.JIMPOVER);
             }
         }
 
@@ -221,7 +224,6 @@ public class ChineseCheckersApp extends Application {
         Piece piece = new Piece(type, x, y);
 
         piece.setOnMouseReleased(e -> {
-
             double newX;
             double newY = toBoard(piece.getLayoutY(), false);
             if (newY % 2 == 0) {
@@ -268,7 +270,6 @@ public class ChineseCheckersApp extends Application {
 
     private double roundHalfDouble(double half) {
         double intPart = Double.parseDouble(String.valueOf(half).split("\\.")[0]);
-        //double fractPart = Double.parseDouble("0." + String.valueOf(half).split("\\.")[1]);
         half = intPart + 0.5;
         return half;
     }
