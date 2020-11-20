@@ -5,6 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -37,8 +38,48 @@ public class ChineseCheckersApp extends Application {
         createTiles();
         createAdj();
         createPieces();
-        System.out.println("TILE" + gBoard.getTile(10.5, 13));
         return root;
+    }
+
+    private void gameOver(TileType tileType, PieceType pieceType) {
+        if (TileType.NEUTRAL == tileType
+                || tileType.getNumber() == pieceType.getNumber()) return;
+
+        Tile tileVertex = verticesStar[tileType.getNumber()];
+        List<Tile> adjacentTiles = gBoard.getAdjTiles(tileVertex);
+
+        List<Tile> endTiles = TilesOfVertexStar(adjacentTiles, 0);
+        int count = 0;
+        for (Tile tile : endTiles) {
+            if (tile.hasPiece() && tile.getPiece().getType() == pieceType)
+                count++;
+        }
+        if (count == 10) System.out.println("GAME OVER");
+    }
+
+    /**
+     * Возращает лист из 10 ячеек (tiles) лучика звезды. Это поле одного из игроков.
+     * Рекурсивный обход лучиков звезды.
+     * count следует передать ноль(т.к. рекурсия, будет увеличиваться с каждым разом).
+     * adjacentTiles должен содержать при передаче две смежные клетки вершины звезды (одну из 6 в нашем случае)
+     *
+     * @param adjacentTiles - лист смежных клеток вершины звезды
+     * @param count         - счетчик выполнения рекурсий
+     * @return
+     */
+    private List<Tile> TilesOfVertexStar(List<Tile> adjacentTiles, int count) {
+        List<Tile> finalList = new ArrayList<>(adjacentTiles);
+
+        for (Tile tile : adjacentTiles) {
+            for (Tile tile1 : gBoard.getAdjTiles(tile))
+                if (!finalList.contains(tile1))
+                    finalList.add(tile1);
+        }
+
+        if (count < 1) {
+            return TilesOfVertexStar(finalList, ++count);
+        } else
+            return finalList;
     }
 
     /**
@@ -56,6 +97,7 @@ public class ChineseCheckersApp extends Application {
             if (y < HEIGHT - 4) {
                 for (double x = leftLim1; x < rightLim1 + 1; x++) {
                     Tile tile = new Tile(x, y);
+                    tile.setTileType(TileType.NEUTRAL);
                     if (y == 0) {
                         verticesStar[0] = tile;
                     }
@@ -85,10 +127,6 @@ public class ChineseCheckersApp extends Application {
                     }
                     if (y == 4) {
                         verticesStar[5] = tile;
-                    }
-                    if (!gBoard.containTile(tile)) {
-                        gBoard.addTile(tile);
-                        tileGroup.getChildren().add(tile);
                     }
                     if (!gBoard.containTile(tile)) {
                         gBoard.addTile(tile);
@@ -126,17 +164,24 @@ public class ChineseCheckersApp extends Application {
      * но в данном примере шашки распологаются в зависимости от наличия смежных плиток)
      */
     private void createPieces() {
-        for (Tile vertex : verticesStar) {
-            Piece piece = makePiece(PieceType.RED, vertex.getX(), vertex.getY());
+
+        for (int nVert = 0; nVert < verticesStar.length; nVert++) {
+            Tile vertex = verticesStar[nVert];
+            PieceType pieceType = PieceType.getPieceType(nVert);
+            Piece piece = makePiece(pieceType, vertex.getX(), vertex.getY());
+            vertex.setColor(pieceType);
+
             vertex.setPiece(piece);
             pieceGroup.getChildren().add(piece);
+
             Tile tile = vertex;
-            List<Tile> adjacentTiles = gBoard.getAdjVertices(tile);
-            addPieces(adjacentTiles, 0);
+            List<Tile> adjacentTiles = gBoard.getAdjTiles(tile);
+            addPieces(adjacentTiles, 0, pieceType);
         }
     }
 
     /**
+     * Продолжение функции сreatePieces.
      * Рекурсивное заполнение от самой вершины, не считая ее,
      * лучиков(концов в виде треугольников) звезды шашками.
      * Располагает шашки по уровням как в пирамиде.
@@ -145,19 +190,20 @@ public class ChineseCheckersApp extends Application {
      * @param adjacentTiles - лист из смежных плиток самой вершины звезды
      * @param count         =0 - поумолчанию ноль
      */
-    private void addPieces(List<Tile> adjacentTiles, int count) {
+    private void addPieces(List<Tile> adjacentTiles, int count, PieceType pieceType) {
         List<Tile> finalList = new ArrayList<>();
         for (Tile tile : adjacentTiles) {
             Piece piece;
             if (!tile.hasPiece()) {
-                piece = makePiece(PieceType.RED, tile.getX(), tile.getY());
+                piece = makePiece(pieceType, tile.getX(), tile.getY());
                 tile.setPiece(piece);
+                tile.setColor(pieceType);
                 pieceGroup.getChildren().add(piece);
-                finalList.addAll(gBoard.getAdjVertices(tile));
+                finalList.addAll(gBoard.getAdjTiles(tile));
             }
         }
         if (count < 2) {
-            addPieces(finalList, ++count);
+            addPieces(finalList, ++count, pieceType);
         }
     }
 
@@ -196,22 +242,37 @@ public class ChineseCheckersApp extends Application {
             x0 = toBoard(piece.getOldX(), true);
         }
 
-        List<Tile> adjTileList0 = gBoard.getAdjVertices(gBoard.getTile(x0, y0));
+        List<Tile> adjTileList0 = gBoard.getAdjTiles(gBoard.getTile(x0, y0));
         if (adjTileList0.contains(newTile)) {
             //передвижение на самую близкую плитку, где нет шашки
             return new MoveResult(MoveType.NORMAL);
-        } else {//прыжок через шашку на плитку, где нет шашки
-            List<Tile> adjTileListNew = gBoard.getAdjVertices(gBoard.getTile(newX, newY));
-            int countCommonCells = 0;
+        } else {
+            //прыжок через шашку на плитку, где нет шашки
+            List<Tile> adjTileListNew = gBoard.getAdjTiles(gBoard.getTile(newX, newY));
+            int countCommonCells = 0, countPieceInCommonCells = 0;
 
             for (Tile adjTile0 : adjTileList0) {
                 for (Tile adjTileNew : adjTileListNew) {
-                    if (adjTile0.equals(adjTileNew) && adjTile0.hasPiece())
+                    if (adjTile0.equals(adjTileNew)) {
                         countCommonCells++;
+                        //ниже исключается случай перехода через клетку с шашкой,
+                        // где клетки разных цветов находятся рядом друг с другом
+                        if (gBoard.getValue(adjTile0).size() == 5
+                                && adjTileList0.size() == 4
+                                && adjTileListNew.size() == 4) {
+                            countCommonCells++;
+                        }
+                    }
+
+                    if (adjTile0.hasPiece() && adjTile0.equals(adjTileNew))
+                        countPieceInCommonCells++;
+
                 }
             }
 
-            if (countCommonCells == 1) {
+            if (countCommonCells == 1 && countPieceInCommonCells == 1
+                //&& adjTileList0.size()!=4 && adjTileList0
+            ) {
                 return new MoveResult(MoveType.JIMPOVER);
             }
         }
@@ -231,8 +292,6 @@ public class ChineseCheckersApp extends Application {
             } else {
                 newX = toBoard(piece.getLayoutX(), true);
             }
-            System.out.println(piece.getLayoutX() + " X= " + newX +
-                    " LAYOUT " + piece.getLayoutY() + " Y= " + newY);
 
             MoveResult result;
             //выходит ли за границы
@@ -254,14 +313,11 @@ public class ChineseCheckersApp extends Application {
                     piece.abortMove();
                     break;
                 case NORMAL:
-                    piece.move(newX, newY);
-                    gBoard.getTile(x0, y0).setPiece(null);
-                    gBoard.getTile(newX, newY).setPiece(piece);
-                    break;
                 case JIMPOVER:
                     piece.move(newX, newY);
                     gBoard.getTile(x0, y0).setPiece(null);
                     gBoard.getTile(newX, newY).setPiece(piece);
+                    gameOver(gBoard.getTile(newX, newY).getTileType(), piece.getType());
                     break;
             }
         });
@@ -277,7 +333,7 @@ public class ChineseCheckersApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Scene scene = new Scene(createContent());
-        primaryStage.setTitle("CheckersApp");
+        primaryStage.setTitle("ChineseCheckersApp");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

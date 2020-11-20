@@ -1,24 +1,25 @@
 package chineseCheckers;
 
-import com.sun.nio.sctp.NotificationHandler;
-
-//типы шашек
-//в китайских шашках 6 игроков  соответственно 6 цветов
-public enum PieceType {
+public enum TileType {
     RED(0),
     ORANGE(1),
     GREEN(2),
     BLUE(3),
     PINK(4),
-    BEIGE(5);
+    BEIGE(5),
+    NEUTRAL(6);
 
     private int edgeNumber ;
 
-    PieceType(int edgeNumber) {
+    TileType(int edgeNumber) {
         this.edgeNumber = edgeNumber;
     }
 
-    public static PieceType getPieceType(int edgeNumber){
+    public int getNumber() {
+        return edgeNumber;
+    }
+
+    public static TileType getPieceType(int edgeNumber){
         switch (edgeNumber){
             case 0 -> {
                 return RED;
@@ -35,10 +36,6 @@ public enum PieceType {
                 return BEIGE;
             }
         }
-        return null;
-    }
-
-    public int getNumber() {
-        return edgeNumber;
+        return NEUTRAL;
     }
 }

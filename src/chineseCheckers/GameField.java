@@ -143,7 +143,7 @@ public class GameField {
      * @param v -Tile
      * @return List<Tile> adjVertices
      */
-    public List<Tile> getAdjVertices(Tile v) {
+    public List<Tile> getAdjTiles(Tile v) {
         return adjTilesMap.get(v);
     }
 }
