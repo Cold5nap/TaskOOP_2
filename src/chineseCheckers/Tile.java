@@ -17,7 +17,8 @@ public class Tile extends Circle {
         this.y = y;
         setRadius(ChineseCheckersApp.TILE_SIZE / 2);
         relocate(x * ChineseCheckersApp.TILE_SIZE, y * ChineseCheckersApp.TILE_SIZE);
-        setFill(Color.DARKGREY);
+        setFill(Color.WHITESMOKE);
+        setStroke(Color.DARKGREY);
     }
 
     public boolean hasPiece() {
@@ -35,12 +36,12 @@ public class Tile extends Circle {
     public void setColor(PieceType type) {
         setTileType(type);
         switch (type){
-            case RED -> setFill(Color.valueOf("#c40003"));
-            case BLUE -> setFill(Color.valueOf("#7CB9E8"));
-            case BEIGE -> setFill(Color.valueOf("#F5F59A"));
-            case GREEN -> setFill(Color.valueOf("#B0BF1A"));
-            case ORANGE -> setFill(Color.valueOf("#C46210"));
-            case PINK -> setFill(Color.valueOf("#F19CBB"));
+            case RED :{ setFill(Color.valueOf("#c40003"));break;}
+            case BLUE : {setFill(Color.valueOf("#7CB9E8"));break;}
+            case BEIGE :{ setFill(Color.valueOf("#F5F59A"));break;}
+            case GREEN : {setFill(Color.valueOf("#B0BF1A"));break;}
+            case ORANGE : {setFill(Color.valueOf("#C46210"));break;}
+            case PINK : {setFill(Color.valueOf("#F19CBB"));break;}
 
         }
     }
@@ -67,12 +68,12 @@ public class Tile extends Circle {
 
     public void setTileType(PieceType pt) {
         switch (pt){
-            case RED -> this.type = TileType.RED;
-            case BLUE -> this.type = TileType.BLUE;
-            case BEIGE -> this.type = TileType.BEIGE;
-            case GREEN -> this.type = TileType.GREEN;
-            case ORANGE -> this.type = TileType.ORANGE;
-            case PINK -> this.type = TileType.PINK;
+            case RED : {this.type = TileType.RED;break;}
+            case BLUE : {this.type = TileType.BLUE;break;}
+            case BEIGE : {this.type = TileType.BEIGE;break;}
+            case GREEN : {this.type = TileType.GREEN;break;}
+            case ORANGE :{ this.type = TileType.ORANGE;break;}
+            case PINK : {this.type = TileType.PINK;break;}
 
         }
     }

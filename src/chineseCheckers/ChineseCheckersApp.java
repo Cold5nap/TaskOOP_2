@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -41,6 +42,12 @@ public class ChineseCheckersApp extends Application {
         return root;
     }
 
+    private void showGameOverAlert(PieceType pieceType){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setHeaderText("Игра окончена.\n"+"Победил игрок:"+pieceType);
+        alert.showAndWait();
+    }
+
     private void gameOver(TileType tileType, PieceType pieceType) {
         if (TileType.NEUTRAL == tileType
                 || tileType.getNumber() == pieceType.getNumber()) return;
@@ -54,7 +61,7 @@ public class ChineseCheckersApp extends Application {
             if (tile.hasPiece() && tile.getPiece().getType() == pieceType)
                 count++;
         }
-        if (count == 10) System.out.println("GAME OVER");
+        if (count == 10) showGameOverAlert(pieceType);
     }
 
     /**
@@ -230,6 +237,9 @@ public class ChineseCheckersApp extends Application {
 
         Tile newTile = gBoard.getTile(newX, newY);
         //переход на плитку, где есть шашка(исключаем возможность перейти на плитку с шашкой)
+        if (newTile == null) {
+            return new MoveResult(MoveType.NONE);
+        }
         if (newTile.hasPiece()) {
             return new MoveResult(MoveType.NONE);
         }
@@ -333,6 +343,7 @@ public class ChineseCheckersApp extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Scene scene = new Scene(createContent());
+        scene.setFill(Color.WHITE);
         primaryStage.setTitle("ChineseCheckersApp");
         primaryStage.setScene(scene);
         primaryStage.show();

@@ -37,7 +37,6 @@ public class Piece extends StackPane {
                                         type==PieceType.GREEN? Color.valueOf("#B0BF1A"):
                                                 type==PieceType.ORANGE? Color.valueOf("#C46210"):
                                                         Color.valueOf("#F19CBB"));
-
         ellipse.setStroke(Color.BLACK);
         ellipse.setStrokeWidth(TILE_SIZE * 0.03);
 

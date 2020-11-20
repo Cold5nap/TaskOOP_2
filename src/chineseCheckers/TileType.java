@@ -21,18 +21,18 @@ public enum TileType {
 
     public static TileType getPieceType(int edgeNumber){
         switch (edgeNumber){
-            case 0 -> {
+            case 0 : {
                 return RED;
             }
-            case 1 -> {
+            case 1 : {
                 return ORANGE;
-            }case 2 -> {
+            } case 2 : {
                 return GREEN;
-            }case 3 -> {
+            } case 3 : {
                 return BLUE;
-            }case 4 -> {
+            } case 4 : {
                 return PINK;
-            }case 5 -> {
+            } case 5 : {
                 return BEIGE;
             }
         }
