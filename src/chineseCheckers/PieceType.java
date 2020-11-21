@@ -18,41 +18,16 @@ public enum PieceType {
 
     public static PieceType getPieceType(int edgeNumber) {
         switch (edgeNumber){
-            /*case 0 -> {
-                return RED;
-            }
-            case 1 -> {
-                return ORANGE;
-            }case 2 -> {
-                return GREEN;
-            }case 3 -> {
-                return BLUE;
-            }case 4 -> {
-                return PINK;
-            }case 5 -> {
-                return BEIGE;
-            }*/
-            case 0:{
-                return RED;
-            }
-            case 1:{
-                return ORANGE;
-            }
-            case 2:{
-                return GREEN;
-            }
-            case 3:{
-                return BLUE;
-            }
-            case 4:{
-                return PINK;
-            }
-            case 5:{
-                return BEIGE;
-            }
+            case 0: return RED;
+            case 1: return ORANGE;
+            case 2: return GREEN;
+            case 3: return BLUE;
+            case 4: return PINK;
+            case 5: return BEIGE;
         }
         return null;
     }
+
 
     public int getNumber() {
         return edgeNumber;

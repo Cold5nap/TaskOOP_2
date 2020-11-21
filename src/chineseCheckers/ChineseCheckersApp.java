@@ -1,12 +1,20 @@
 package chineseCheckers;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -17,14 +25,14 @@ public class ChineseCheckersApp extends Application {
     public static final int TILE_SIZE = 35;
     public static final double WIDTH = 17;
     public static final double HEIGHT = 17;
-    public static final double CENTER = 8;//0-17
+    public static final double CENTER = 8;
 
     private GameField gBoard = new GameField();
+    private Tile[] verticesStar = new Tile[6];//крайние вершины звезды
+    private Order order = new Order(0, 2); //порядковый номер типа шашки(чей ход)
 
     private Group tileGroup = new Group();
     private Group pieceGroup = new Group();
-
-    private Tile[] verticesStar = new Tile[6];//крайние вершины звезды
 
 
     public static void main(String[] args) {
@@ -32,9 +40,12 @@ public class ChineseCheckersApp extends Application {
     }
 
     private Parent createContent() {
-        Pane root = new Pane();
-        root.setPrefSize(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
-        root.getChildren().addAll(tileGroup, pieceGroup);
+        VBox root = new VBox();
+        root.setPrefWidth(WIDTH * TILE_SIZE);
+        StackPane contentPane = new StackPane(tileGroup, pieceGroup);
+        contentPane.setPrefSize((WIDTH - 4) * TILE_SIZE, HEIGHT * TILE_SIZE);
+        contentPane.setAlignment(Pos.TOP_CENTER);
+        root.getChildren().addAll(stepPane(), contentPane);
 
         createTiles();
         createAdj();
@@ -42,9 +53,54 @@ public class ChineseCheckersApp extends Application {
         return root;
     }
 
-    private void showGameOverAlert(PieceType pieceType){
+    private HBox stepPane() {
+        HBox hBox = new HBox();
+        hBox.setMinSize(WIDTH * TILE_SIZE + 100, 60);
+        hBox.setAlignment(Pos.TOP_CENTER);
+
+        Label label = order.getLabel();
+        label.setFont(Font.font(30));
+        label.setMinSize(50, 50);
+        label.setPadding(new Insets(10));
+
+        Button nextStepButton = new Button("Ход закончен");
+        nextStepButton.setFont(Font.font(20));
+        nextStepButton.setMinSize(60, 60);
+
+        nextStepButton.setOnMouseClicked(e -> {
+            order.nextOrder();
+            label.setText(order.getStringOfLabel());
+        });
+
+        VBox vBox = new VBox();
+        vBox.setPadding(new Insets(0, 0, 0, 30));
+
+        TextArea inputText = new TextArea();
+        inputText.setFont(Font.font(15));
+        inputText.setMaxSize(150, 20);
+        inputText.setText("2");
+        order.setNumberOfPlayers(Integer.parseInt(inputText.getText()));
+
+        Label labelNumberPlayers = new Label("Кол-во игроков: ");
+        labelNumberPlayers.setFont(Font.font(20));
+
+        vBox.getChildren().addAll(labelNumberPlayers, inputText);
+
+        Button inputButton = new Button("Подтвердить");
+        inputButton.setMinSize(60,60);
+        inputButton.setFont(Font.font(20));
+        inputButton.setOnMouseClicked(e -> {
+            order.setNumberOfPlayers(Integer.parseInt(inputText.getText()));
+            inputText.setText("Подтверждено. Играет "+order.getNumberOfPlayers()+"игроков");
+        });
+
+        hBox.getChildren().addAll(label, nextStepButton, vBox, inputButton);
+        return hBox;
+    }
+
+    private void showGameOverAlert(PieceType pieceType) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setHeaderText("Игра окончена.\n"+"Победил игрок:"+pieceType);
+        alert.setHeaderText("Игра окончена.\n" + "Победил игрок:" + pieceType);
         alert.showAndWait();
     }
 
@@ -318,17 +374,38 @@ public class ChineseCheckersApp extends Application {
             } else {
                 x0 = toBoard(piece.getOldX(), true);
             }
-            switch (result.getType()){
-                case NONE:
-                    piece.abortMove();
-                    break;
-                case NORMAL:
-                case JIMPOVER:
-                    piece.move(newX, newY);
-                    gBoard.getTile(x0, y0).setPiece(null);
-                    gBoard.getTile(newX, newY).setPiece(piece);
-                    gameOver(gBoard.getTile(newX, newY).getTileType(), piece.getType());
-                    break;
+
+            if (piece.getType().getNumber() != order.getNumber())
+                piece.abortMove();
+            else {
+                switch (result.getType()){
+                    case NONE:
+                        piece.abortMove();
+                        break;
+                    case NORMAL:
+                        if (order.isPrevOrderJUMPOVER()) {
+                            piece.abortMove();
+                        } else {
+                            piece.move(newX, newY);
+                            gBoard.getTile(x0, y0).setPiece(null);
+                            gBoard.getTile(newX, newY).setPiece(piece);
+                            gameOver(gBoard.getTile(newX, newY).getTileType(), piece.getType());
+                            order.nextOrder();
+                        }
+                        break;
+                    case JIMPOVER:
+                        if (order.getPiece() == piece || !order.isPrevOrderJUMPOVER()) {
+                            order.setPrevOrderJUMPOVER(true);
+                            order.setPiece(piece);
+                            piece.move(newX, newY);
+                            gBoard.getTile(x0, y0).setPiece(null);
+                            gBoard.getTile(newX, newY).setPiece(piece);
+                            gameOver(gBoard.getTile(newX, newY).getTileType(), piece.getType());
+                        } else {
+                            piece.abortMove();
+                        }
+                        break;
+                }
             }
         });
         return piece;
