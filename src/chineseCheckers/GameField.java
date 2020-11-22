@@ -3,10 +3,13 @@ package chineseCheckers;
 
 import java.util.*;
 
-//представляет собой граф (Graph)
+/**
+ * adjTilesMap - сам граф
+ */
 public class GameField {
 
-    private HashMap<Tile, List<Tile>> adjTilesMap;
+    //граф
+    private final HashMap<Tile, List<Tile>> adjTilesMap;
 
     public GameField() {
         adjTilesMap = new HashMap<>();
@@ -18,13 +21,12 @@ public class GameField {
 
     public Tile getTile(double x, double y) {
         Set<Tile> tileSet = adjTilesMap.keySet();
-        Tile tile = null;
         for (Tile t : tileSet) {
             if (t.equals(new Tile(x, y))){
                 return t;
             }
         }
-        return tile;
+        return null;
     }
 
     public List<Tile> getValue(Tile key) {
@@ -32,19 +34,11 @@ public class GameField {
     }
 
     public List<Tile> getTiles() {
-        List<Tile> list = new ArrayList<>();
-        Iterator iterator = adjTilesMap.keySet().iterator();
-        while (iterator.hasNext()) {
-            Tile tile = (Tile) iterator.next();
-            list.add(tile);
-        }
-        return list;
+        return new ArrayList<>(adjTilesMap.keySet());
     }
 
     public boolean containTile(Tile tile) {
-        Iterator iterator = adjTilesMap.keySet().iterator();
-        while (iterator.hasNext()) {
-            Tile t = (Tile) iterator.next();
+        for (Tile t : adjTilesMap.keySet()) {
             if (tile.getX() == t.getX() && tile.getY() == t.getY()) {
                 return true;
             }
@@ -61,54 +55,44 @@ public class GameField {
     }
 
     public void removeTile(Tile v) {
-        adjTilesMap.values().stream().forEach(e -> e.remove(v));
+        adjTilesMap.values().forEach(e -> e.remove(v));
         adjTilesMap.remove(v);
     }
 
     /**
-     * Return TRUE if Tile have an adjacent
+     * Добавляет смежность между вершинами.
+     * Есть проверки:
+     * на то что переданы одинаковые вершины,
+     * вершины нет в графе.
      *
      * @param v1 - Tile 1
      * @param v2 - Tile 2
-     * @return true if adjacent
      */
-    public boolean addAdj(Tile v1, Tile v2) {
-        boolean isAdded = false;
-        if (v1.equals(v2)) {
-            return false;
-        }
-        if (adjTilesMap.containsKey(v1)) {
-            addTile(v1);
-        }
-        if (adjTilesMap.containsKey(v2)) {
-            addTile(v2);
+    public void addAdj(Tile v1, Tile v2) {
+        if (v1.equals(v2)||!adjTilesMap.containsKey(v1)||!adjTilesMap.containsKey(v2)) {
+            return;
         }
 
-        //для первой вершины заполняем связи
+        //для первой вершины заполняем ребра
         if (adjTilesMap.get(v1) == null) {
             List<Tile> l = new ArrayList<>();
             l.add(v2);
             adjTilesMap.putIfAbsent(v1, l);
-            isAdded = true;
         } else {
             if (!adjTilesMap.get(v1).contains(v2)) {
-                isAdded = true;
                 adjTilesMap.get(v1).add(v2);
             }
         }
-        //заполняем связи для второй вершины
+        //заполняем ребра для второй вершины
         if (adjTilesMap.get(v2) == null) {
             List<Tile> l = new ArrayList<>();
             l.add(v1);
             adjTilesMap.putIfAbsent(v2, l);
-            isAdded = true;
         } else {
             if (!adjTilesMap.get(v2).contains(v1)) {
-                isAdded = true;
                 adjTilesMap.get(v2).add(v1);
             }
         }
-        return isAdded;
     }
 
     /**
@@ -132,19 +116,14 @@ public class GameField {
         return adjTilesMap.get(v).contains(adjV);
     }
 
-    public List<Tile> adjVertices(Tile v) {
-        return adjTilesMap.get(v);
-    }
-
     /**
-     * Return adjacent vertices of given Tile.
-     * TYPE List<Tile>
+     * Возращает лист смежных вершины для tile
      *
-     * @param v -Tile
-     * @return List<Tile> adjVertices
+     * @param tile -Tile
+     * @return List<Tile> adjVertices - лист из смежных вершины
      */
-    public List<Tile> getAdjTiles(Tile v) {
-        return adjTilesMap.get(v);
+    public List<Tile> getAdjTiles(Tile tile) {
+        return adjTilesMap.get(tile);
     }
 }
 

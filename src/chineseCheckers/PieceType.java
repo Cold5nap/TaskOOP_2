@@ -10,7 +10,7 @@ public enum PieceType {
     PINK(4),
     BEIGE(5);
 
-    private int edgeNumber;
+    private final int edgeNumber;
 
     PieceType(int edgeNumber) {
         this.edgeNumber = edgeNumber;

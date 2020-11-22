@@ -8,14 +8,14 @@ public class Tile extends Circle {
 
     private Piece piece;
     //x,y- счетчики плиток по оси OX и OY
-    private double x;
-    private double y;
+    private final double x;
+    private final double y;
     private TileType type;
 
     public Tile(double x, double y) {
         this.x = x;
         this.y = y;
-        setRadius(ChineseCheckersApp.TILE_SIZE / 2);
+        setRadius(ChineseCheckersApp.TILE_SIZE / 2.0);
         relocate(x * ChineseCheckersApp.TILE_SIZE, y * ChineseCheckersApp.TILE_SIZE);
         setFill(Color.WHITESMOKE);
         setStroke(Color.DARKGREY);
@@ -40,18 +40,14 @@ public class Tile extends Circle {
             case BLUE : {setFill(Color.valueOf("#7CB9E8"));break;}
             case BEIGE :{ setFill(Color.valueOf("#F5F59A"));break;}
             case GREEN : {setFill(Color.valueOf("#B0BF1A"));break;}
-            case ORANGE : {setFill(Color.valueOf("#C46210"));break;}
+            case ORANGE : {setFill(Color.ORCHID);break;}
             case PINK : {setFill(Color.valueOf("#F19CBB"));break;}
 
         }
     }
 
     public boolean equals(Tile tile) {
-        if (Math.abs(x - tile.getX()) < 0.0001 && Math.abs(y - tile.getY()) < 0.0001) {
-            return true;
-        } else {
-            return false;
-        }
+        return Math.abs(x - tile.getX()) < 0.0001 && Math.abs(y - tile.getY()) < 0.0001;
     }
 
     public double getX() {
@@ -80,9 +76,5 @@ public class Tile extends Circle {
 
     public void setTileType(TileType type) {
         this.type = type;
-    }
-
-    public void printСoordinate() {
-        System.out.print(" X= " + x + " Y= " + y);
     }
 }

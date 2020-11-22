@@ -6,17 +6,17 @@ public class Order {
     private int number;
     private int numberOfPlayers;
     private boolean isPrevOrderJUMPOVER = false;
-    private Label label;
+    private final Label pieceTypeLabel;
     private Piece piece = null;
 
     public Order(int number, int numberOfPlayers) {
         this.number = number;
         this.numberOfPlayers = numberOfPlayers - 1;
-        this.label = new Label("Ход игрока: " + getPieceType());
+        this.pieceTypeLabel = new Label("Ход игрока: " + getPieceType());
     }
 
     public int getNumberOfPlayers() {
-        return numberOfPlayers;
+        return numberOfPlayers + 1;
     }
 
     public void setNumberOfPlayers(int numberOfPlayers) {
@@ -32,23 +32,19 @@ public class Order {
     }
 
     public void setStringToLabel(String data) {
-        label.setText(data);
+        pieceTypeLabel.setText(data);
     }
 
     public String getStringOfLabel() {
-        return label.getText();
+        return pieceTypeLabel.getText();
     }
 
-    public Label getLabel() {
-        return label;
+    public Label getPieceTypeLabel() {
+        return pieceTypeLabel;
     }
 
     public int getNumber() {
         return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
     }
 
     public boolean isPrevOrderJUMPOVER() {

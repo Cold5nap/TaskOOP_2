@@ -1,7 +1,6 @@
 package chineseCheckers;
 
 import javafx.application.Application;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Parent;
@@ -9,10 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -27,12 +24,12 @@ public class ChineseCheckersApp extends Application {
     public static final double HEIGHT = 17;
     public static final double CENTER = 8;
 
-    private GameField gBoard = new GameField();
-    private Tile[] verticesStar = new Tile[6];//крайние вершины звезды
-    private Order order = new Order(0, 2); //порядковый номер типа шашки(чей ход)
+    private final GameField gBoard = new GameField();
+    private final Tile[] verticesStar = new Tile[6];//крайние вершины звезды
+    private final Order order = new Order(0, 2); //порядковый номер типа шашки(чей ход)
 
-    private Group tileGroup = new Group();
-    private Group pieceGroup = new Group();
+    private final Group tileGroup = new Group();
+    private final Group pieceGroup = new Group();
 
 
     public static void main(String[] args) {
@@ -43,8 +40,9 @@ public class ChineseCheckersApp extends Application {
         VBox root = new VBox();
         root.setPrefWidth(WIDTH * TILE_SIZE);
         StackPane contentPane = new StackPane(tileGroup, pieceGroup);
+        contentPane.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         contentPane.setPrefSize((WIDTH - 4) * TILE_SIZE, HEIGHT * TILE_SIZE);
-        contentPane.setAlignment(Pos.TOP_CENTER);
+        contentPane.setAlignment(Pos.CENTER);
         root.getChildren().addAll(stepPane(), contentPane);
 
         createTiles();
@@ -53,17 +51,21 @@ public class ChineseCheckersApp extends Application {
         return root;
     }
 
+    /**
+     * Интерфейс: хода игрока, кол-во игроков
+     *
+     * @return stepPane - HBox
+     */
     private HBox stepPane() {
         HBox hBox = new HBox();
-        hBox.setMinSize(WIDTH * TILE_SIZE + 100, 60);
+        hBox.setMinSize(WIDTH * TILE_SIZE + 200, 60);
         hBox.setAlignment(Pos.TOP_CENTER);
-
-        Label label = order.getLabel();
+        hBox.setSpacing(30);
+        Label label = order.getPieceTypeLabel();
         label.setFont(Font.font(30));
         label.setMinSize(50, 50);
-        label.setPadding(new Insets(10));
 
-        Button nextStepButton = new Button("Ход закончен");
+        Button nextStepButton = new Button("Окончить ход");
         nextStepButton.setFont(Font.font(20));
         nextStepButton.setMinSize(60, 60);
 
@@ -72,38 +74,52 @@ public class ChineseCheckersApp extends Application {
             label.setText(order.getStringOfLabel());
         });
 
-        VBox vBox = new VBox();
-        vBox.setPadding(new Insets(0, 0, 0, 30));
+        HBox playersHBox = new HBox();
+        VBox inputInfPlayersVBox = new VBox();
 
-        TextArea inputText = new TextArea();
+        TextField inputText = new TextField();
         inputText.setFont(Font.font(15));
-        inputText.setMaxSize(150, 20);
+        inputText.setMaxWidth(30);
         inputText.setText("2");
         order.setNumberOfPlayers(Integer.parseInt(inputText.getText()));
 
         Label labelNumberPlayers = new Label("Кол-во игроков: ");
         labelNumberPlayers.setFont(Font.font(20));
 
-        vBox.getChildren().addAll(labelNumberPlayers, inputText);
-
         Button inputButton = new Button("Подтвердить");
-        inputButton.setMinSize(60,60);
-        inputButton.setFont(Font.font(20));
+        inputButton.setFont(Font.font(10));
         inputButton.setOnMouseClicked(e -> {
             order.setNumberOfPlayers(Integer.parseInt(inputText.getText()));
-            inputText.setText("Подтверждено. Играет "+order.getNumberOfPlayers()+"игроков");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Уведомление");
+            alert.setHeaderText("Подтверждение");
+            alert.setContentText("Вы определили " + order.getNumberOfPlayers() + " игроков");
+            alert.showAndWait();
         });
 
-        hBox.getChildren().addAll(label, nextStepButton, vBox, inputButton);
+        inputInfPlayersVBox.getChildren().addAll(labelNumberPlayers, inputButton);
+        playersHBox.getChildren().addAll(inputInfPlayersVBox,inputText);
+        hBox.getChildren().addAll(label, nextStepButton, playersHBox);
         return hBox;
     }
 
+    /**
+     * Alert - окончания игры. Выводит тип шашки победителя.
+     *
+     * @param pieceType тип шашки игрока, который победил
+     */
     private void showGameOverAlert(PieceType pieceType) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText("Игра окончена.\n" + "Победил игрок:" + pieceType);
         alert.showAndWait();
     }
 
+    /**
+     * Проверка, что игрок одержал победу. Игрок должен достичь клетки противника.
+     *
+     * @param tileType  - тип tile
+     * @param pieceType - тип piece
+     */
     private void gameOver(TileType tileType, PieceType pieceType) {
         if (TileType.NEUTRAL == tileType
                 || tileType.getNumber() == pieceType.getNumber()) return;
@@ -111,7 +127,7 @@ public class ChineseCheckersApp extends Application {
         Tile tileVertex = verticesStar[tileType.getNumber()];
         List<Tile> adjacentTiles = gBoard.getAdjTiles(tileVertex);
 
-        List<Tile> endTiles = TilesOfVertexStar(adjacentTiles, 0);
+        List<Tile> endTiles = tilesOfVertexStar(adjacentTiles, 0);
         int count = 0;
         for (Tile tile : endTiles) {
             if (tile.hasPiece() && tile.getPiece().getType() == pieceType)
@@ -128,9 +144,9 @@ public class ChineseCheckersApp extends Application {
      *
      * @param adjacentTiles - лист смежных клеток вершины звезды
      * @param count         - счетчик выполнения рекурсий
-     * @return
+     * @return tilesOfVertexStar - лист из tile(10 клеток от вершины звезды)
      */
-    private List<Tile> TilesOfVertexStar(List<Tile> adjacentTiles, int count) {
+    private List<Tile> tilesOfVertexStar(List<Tile> adjacentTiles, int count) {
         List<Tile> finalList = new ArrayList<>(adjacentTiles);
 
         for (Tile tile : adjacentTiles) {
@@ -140,7 +156,7 @@ public class ChineseCheckersApp extends Application {
         }
 
         if (count < 1) {
-            return TilesOfVertexStar(finalList, ++count);
+            return tilesOfVertexStar(finalList, ++count);
         } else
             return finalList;
     }
@@ -224,7 +240,8 @@ public class ChineseCheckersApp extends Application {
      * Располагает по лучям звезеды шашки,
      * основываясь на смежности вершин данного графа.
      * (Можно расположить было в зависимости от координат плитки,
-     * но в данном примере шашки распологаются в зависимости от наличия смежных плиток)
+     * но в данном примере шашки распологаются в зависимости от наличия смежных плиток).
+     * имеет функцию рекурсивного заполнения шашками
      */
     private void createPieces() {
 
@@ -237,8 +254,7 @@ public class ChineseCheckersApp extends Application {
             vertex.setPiece(piece);
             pieceGroup.getChildren().add(piece);
 
-            Tile tile = vertex;
-            List<Tile> adjacentTiles = gBoard.getAdjTiles(tile);
+            List<Tile> adjacentTiles = gBoard.getAdjTiles(vertex);
             addPieces(adjacentTiles, 0, pieceType);
         }
     }
@@ -251,7 +267,7 @@ public class ChineseCheckersApp extends Application {
      * (сначала заполняет уровень, потом последующий)
      *
      * @param adjacentTiles - лист из смежных плиток самой вершины звезды
-     * @param count         =0 - поумолчанию ноль
+     * @param count         =0      - поумолчанию ноль
      */
     private void addPieces(List<Tile> adjacentTiles, int count, PieceType pieceType) {
         List<Tile> finalList = new ArrayList<>();
@@ -278,17 +294,26 @@ public class ChineseCheckersApp extends Application {
      * иначе берется стандартное округление числа.
      *
      * @param pixel - нынешнее расположение
-     * @return
+     * @return abscissa_or_ordinate_of_a_point - координата точки по Оси
      */
     private double toBoard(double pixel, boolean isHalf) {
         pixel = pixel / TILE_SIZE;
         if (isHalf) {
-            return roundHalfDouble(pixel);
+            //берет целую часть вещественного числа и добавляет 1/2 к нему
+            return Double.parseDouble(String.valueOf(pixel).split("\\.")[0]) + 0.5;
         } else {
             return Math.round(pixel);
         }
     }
 
+    /**
+     * Возращает результат передвижения piece
+     *
+     * @param piece - шашка
+     * @param newX  - новый X - координата пикселя
+     * @param newY  - новый Y - координата пикселя
+     * @return tryMove - результат передвижения
+     */
     private MoveResult tryMove(Piece piece, double newX, double newY) {
 
         Tile newTile = gBoard.getTile(newX, newY);
@@ -346,7 +371,15 @@ public class ChineseCheckersApp extends Application {
         return new MoveResult(MoveType.NONE);
     }
 
-    //Действие шашки на доске
+    /**
+     * Возращает шашку.
+     * При создании шашки в нее добавляет Event по отпусканию кнопки мышки
+     *
+     * @param type - тип шашки
+     * @param x    - координа шашки по X
+     * @param y    - координа шашки по Y
+     * @return piece - шашку с event OnMouseReleased
+     */
     private Piece makePiece(PieceType type, double x, double y) {
         Piece piece = new Piece(type, x, y);
 
@@ -411,14 +444,9 @@ public class ChineseCheckersApp extends Application {
         return piece;
     }
 
-    private double roundHalfDouble(double half) {
-        double intPart = Double.parseDouble(String.valueOf(half).split("\\.")[0]);
-        half = intPart + 0.5;
-        return half;
-    }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         Scene scene = new Scene(createContent());
         scene.setFill(Color.WHITE);
         primaryStage.setTitle("ChineseCheckersApp");

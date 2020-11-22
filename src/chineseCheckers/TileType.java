@@ -9,7 +9,7 @@ public enum TileType {
     BEIGE(5),
     NEUTRAL(6);
 
-    private int edgeNumber ;
+    private final int edgeNumber ;
 
     TileType(int edgeNumber) {
         this.edgeNumber = edgeNumber;
@@ -19,23 +19,4 @@ public enum TileType {
         return edgeNumber;
     }
 
-    public static TileType getPieceType(int edgeNumber){
-        switch (edgeNumber){
-            case 0 : {
-                return RED;
-            }
-            case 1 : {
-                return ORANGE;
-            } case 2 : {
-                return GREEN;
-            } case 3 : {
-                return BLUE;
-            } case 4 : {
-                return PINK;
-            } case 5 : {
-                return BEIGE;
-            }
-        }
-        return NEUTRAL;
-    }
 }
